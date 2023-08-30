@@ -1,2 +1,3 @@
 print("hi zoro i will find you")
-wait("")
+wait("5")
+game.Players.LocalPlayer:Kick("You have been banned for : Cheating and exploting. Ban expires in 560151514 hours.")
