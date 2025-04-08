@@ -100,3 +100,27 @@ Tabs.xtra:AddButton({
         })
     end
 })
+Tabs.xtra:AddButton({
+    Title = "esp",
+    Description = "fucking esp nigger",
+    Callback = function()
+        Window:Dialog({
+            Title = "nigger",
+            Content = "nigger de nigger",
+            Buttons = {
+                {
+                    Title = "Run",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/esp",true))()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        print("Cancelled the dialog.")
+                    end
+                }
+            }
+        })
+    end
+})
