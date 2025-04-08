@@ -1,0 +1,102 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "REDTREE HUB",
+    SubTitle = "by redtree the sigma male",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+local Tabs = {
+    Movement = Window:AddTab({ Title = "Movement", Icon = "" }),
+    xtra = Window:AddTab({ Title = "Extra Scripts", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+Tabs.Movement:AddToggle("WalkSpeed", {
+    Title = "WalkSpeed",
+    Default = false,
+    Callback = function(v)
+        getgenv().ws = v
+        while getgenv().ws do
+            wait()
+            if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 40
+            end
+        end
+        if not getgenv().ws then
+            if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+            end
+        end
+    end
+})
+Tabs.Movement:AddToggle("Noclip", {
+    Title = "Noclip",
+    Default = false,
+    Callback = function(v)
+        getgenv().noclip = v
+        while getgenv().noclip do
+            wait()
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide == true and v.Name ~= floatName then
+                    v.CanCollide = false
+                    if not getgenv().noclip then
+                        v.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+})
+Tabs.xtra:AddButton({
+    Title = "Infinite Yield",
+    Description = "admin script woohoo",
+    Callback = function()
+        Window:Dialog({
+            Title = "Title",
+            Content = "Run infinite yield script fucking nigger",
+            Buttons = {
+                {
+                    Title = "Run",
+                    Callback = function()
+                        loadstring(game:HttpGet(('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'),true))()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        print("Cancelled the dialog.")
+                    end
+                }
+            }
+        })
+    end
+})
+Tabs.xtra:AddButton({
+    Title = "OP BANANA EATS SCRIPT",
+    Description = "o ba an anzeafg nigge ninnger nighger nigger",
+    Callback = function()
+        Window:Dialog({
+            Title = "nigger",
+            Content = "nigger de nigger",
+            Buttons = {
+                {
+                    Title = "Run",
+                    Callback = function()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/main%20(2).lua",true))()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        print("Cancelled the dialog.")
+                    end
+                }
+            }
+        })
+    end
+})
