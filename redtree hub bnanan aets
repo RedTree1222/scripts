@@ -124,3 +124,81 @@ Tabs.xtra:AddButton({
         })
     end
 })
+Tabs.Movement:AddToggle("Auto Eat", {
+    Title = "Auto Eat All",
+    Default = false,
+    Callback = function(v)
+        getgenv().eat = v
+        while getgenv().eat do
+            wait()
+            for i, v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and game.Players.LocalPlayer.Character:FindFirstChild("Hitbox") then
+                    if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                        firetouchinterest(game.Players.LocalPlayer.Character.Hitbox, v.Character.HumanoidRootPart, 0)
+                        firetouchinterest(game.Players.LocalPlayer.Character.Hitbox, v.Character.HumanoidRootPart, 1)
+                    end
+                end
+            end
+        end
+    end
+})
+Tabs.Movement:AddToggle("Auto Win", {
+    Title = "Auto Win",
+    Default = false,
+    Callback = function(v)
+        getgenv().win = v
+        while getgenv().win do
+            wait()
+            for i, v in pairs(game:GetService("Workspace").GameKeeper.Exits:GetChildren()) do
+                if v.Name == "EscapeDoor" then
+                    for i, j in pairs(v:GetChildren()) do
+                        if j.Name == "ExitTag" and game.Players.LocalPlayer.Team == game.Teams.Runners and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, j.Parent.Root, 0)
+                            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, j.Parent.Root, 1)
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
+Tabs.Movement:AddToggle("Auto Coin", {
+    Title = "Auto Collect Coin",
+    Default = false,
+    Callback = function(v)
+        getgenv().coin = v
+        while getgenv().coin do
+            wait()
+            for i, v in pairs(game:GetService("Workspace").GameKeeper.Map:GetChildren()) do
+                if v.Name == "Tokens" then
+                    for i, j in pairs(v:GetChildren()) do
+                        if j.Name == "Token" and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, j, 0)
+                            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, j, 1)
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
+Tabs.Movementsd:AddToggle("Auto Power", {
+    Title = "Auto Collect Power",
+    Default = false,
+    Callback = function(v)
+        getgenv().power = v
+        while getgenv().power do
+            wait()
+            for i, v in pairs(game:GetService("Workspace").GameKeeper.Map:GetChildren()) do
+                if v.Name == "Tokens" then
+                    for i, j in pairs(v:GetChildren()) do
+                        if j.ClassName == "MeshPart" and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, j, 0)
+                            firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, j, 1)
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
