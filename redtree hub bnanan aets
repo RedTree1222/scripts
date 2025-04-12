@@ -124,6 +124,40 @@ Tabs.xtra:AddButton({
         })
     end
 })
+Tabs.Movement:AddButton({
+    Title = "Tp to safe place",
+    Description = "teleport to a fucking safe place",
+    Callback = function()
+        Window:Dialog({
+            Title = "nigger",
+            Content = "nigger de nigger",
+            Buttons = {
+                {
+                    Title = "Tp to a fucking safe place??",
+                    Callback = function()
+                    local function teleportToPlatform()
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 0, 0)
+                    local platform = Instance.new("Part", workspace)
+                    platform.Size = Vector3.new(20, 1, 20)
+                    platform.Position = Vector3.new(0, 200, 0)
+                    platform.Anchored = true
+                    platform.Color = Color3.fromRGB(255, 255, 255)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 205, 0)
+                    end
+
+                    teleportToPlatform()
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Callback = function()
+                        print("Cancelled the dialog.")
+                    end
+                }
+            }
+        })
+    end
+})
 Tabs.Movement:AddToggle("Auto Eat", {
     Title = "Auto Eat All",
     Default = false,
