@@ -135,17 +135,17 @@ Tabs.Movement:AddButton({
                 {
                     Title = "Tp to a fucking safe place??",
                     Callback = function()
-                    local function teleportToPlatform()
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 0, 0)
-                    local platform = Instance.new("Part", workspace)
-                    platform.Size = Vector3.new(20, 1, 20)
-                    platform.Position = Vector3.new(0, 200, 0)
-                    platform.Anchored = true
-                    platform.Color = Color3.fromRGB(255, 255, 255)
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 205, 0)
-                    end
+				    local function teleportToPlatform()
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 0, 0)
+					local platform = Instance.new("Part", workspace)
+					platform.Size = Vector3.new(20, 1, 20)
+					platform.Position = Vector3.new(-287.150635, 100.3980255, 621.549805, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+					platform.Anchored = true
+					platform.Color = Color3.fromRGB(255, 255, 255)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-287.150635, 100.3980255, 621.549805, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+					end
 
-                    teleportToPlatform()
+					teleportToPlatform()
                     end
                 },
                 {
