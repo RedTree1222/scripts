@@ -154,7 +154,7 @@ Toggles.AutoPower = MovementBox:AddToggle('AutoPower', {
     end
 })
 
--- Teleport Button
+-- Teleport Safe Spot
 MovementBox:AddButton({
     Text = 'Teleport to Safe Spot',
     Func = function()
@@ -180,7 +180,7 @@ MovementBox:AddButton({
 local TrollBananaDistance = MovementBox:AddSlider("TrollBananaDistance", {
     Text = "Troll Banana Distance",
     Min = 10,
-    Max = 100, -- default max
+    Max = 100,
     Default = 100,
     Rounding = 1
 })
@@ -222,9 +222,9 @@ Toggles.TrollBanana = MovementBox:AddToggle("TrollBanana", {
                 local bHrp = bananaModel:FindFirstChild("HumanoidRootPart")
                 if not bHrp then continue end
 
-                -- get direction the banana is facing
+                -- direction banana is facing
                 local direction = bHrp.CFrame.LookVector
-                local distance = TrollBananaDistance.Value -- read slider value dynamically
+                local distance = TrollBananaDistance.Value
 
                 -- teleport player in front of banana
                 hrp.CFrame = CFrame.new(bHrp.Position + direction * distance, bHrp.Position)
