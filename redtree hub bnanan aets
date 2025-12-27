@@ -58,6 +58,102 @@ Toggles.Noclip = MainBox:AddToggle('Noclip', {
     end
 })
 
+-- AutoEat
+Toggles.AutoEat = MainBox:AddToggle('AutoEat', {
+    Text = 'Auto Eat Players',
+    Default = false,
+    Callback = function(state)
+        getgenv().autoEat = state
+        spawn(function()
+            while getgenv().autoEat do
+                task.wait()
+                local char = game.Players.LocalPlayer.Character
+                if not char or not char:FindFirstChild("Hitbox") then continue end
+                for _, p in pairs(game.Players:GetPlayers()) do
+                    if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        firetouchinterest(char.Hitbox, p.Character.HumanoidRootPart, 0)
+                        firetouchinterest(char.Hitbox, p.Character.HumanoidRootPart, 1)
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- AutoWin
+Toggles.AutoWin = MainBox:AddToggle('AutoWin', {
+    Text = 'Auto Win',
+    Default = false,
+    Callback = function(state)
+        getgenv().autoWin = state
+        spawn(function()
+            while getgenv().autoWin do
+                task.wait()
+                local player = game.Players.LocalPlayer
+                if not player.Character or player.Team ~= game.Teams.Runners then continue end
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then continue end
+                for _, exit in pairs(workspace.GameKeeper.Exits:GetChildren()) do
+                    if exit.Name == "EscapeDoor" and exit:FindFirstChild("Root") then
+                        firetouchinterest(hrp, exit.Root, 0)
+                        firetouchinterest(hrp, exit.Root, 1)
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- AutoCoin
+Toggles.AutoCoin = MainBox:AddToggle('AutoCoin', {
+    Text = 'Auto Collect Coins',
+    Default = false,
+    Callback = function(state)
+        getgenv().autoCoin = state
+        spawn(function()
+            while getgenv().autoCoin do
+                task.wait()
+                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then continue end
+                for _, folder in pairs(workspace.GameKeeper.Map:GetChildren()) do
+                    if folder.Name == "Tokens" then
+                        for _, token in pairs(folder:GetChildren()) do
+                            firetouchinterest(hrp, token, 0)
+                            firetouchinterest(hrp, token, 1)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- AutoPower
+Toggles.AutoPower = MainBox:AddToggle('AutoPower', {
+    Text = 'Auto Collect Power',
+    Default = false,
+    Callback = function(state)
+        getgenv().autoPower = state
+        spawn(function()
+            while getgenv().autoPower do
+                task.wait()
+                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then continue end
+                for _, folder in pairs(workspace.GameKeeper.Map:GetChildren()) do
+                    if folder.Name == "Tokens" then
+                        for _, item in pairs(folder:GetChildren()) do
+                            if item:IsA("MeshPart") then
+                                firetouchinterest(hrp, item, 0)
+                                firetouchinterest(hrp, item, 1)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
 -- Teleport to Safe Spot
 MainBox:AddButton({
     Text = 'Teleport to Safe Spot',
