@@ -176,6 +176,57 @@ MainBox:AddButton({
     end
 })
 
+-- Big Hitbox Toggle
+Toggles.BigHitbox = MainBox:AddToggle('BigHitbox', {
+    Text = 'Big Hitbox',
+    Default = false,
+    Callback = function(state)
+        getgenv().bigHitboxEnabled = state
+    end
+})
+
+-- Table to store default sizes (optional)
+local defaultSizes = {}
+
+local function applyBigHitbox(player)
+    if not player.Character then return end
+    if player.Name == "waaibro12" or player.Name == "RedTree1222" then return end
+    for _, part in pairs(player.Character:GetChildren()) do
+        if part:IsA("BasePart") then
+            if not defaultSizes[part] then
+                defaultSizes[part] = part.Size
+            end
+            part.Size = Vector3.new(100000, 100000, 100000)
+            part.Massless = true
+            part.CanCollide = false
+        end
+    end
+end
+
+-- Loop to apply big hitbox every 5 seconds
+task.spawn(function()
+    while true do
+        task.wait(5)
+        if getgenv().bigHitboxEnabled then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    applyBigHitbox(player)
+                end
+            end
+        end
+    end
+end)
+
+-- Apply to new players
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(1)
+        if getgenv().bigHitboxEnabled then
+            applyBigHitbox(player)
+        end
+    end)
+end)
+
 -- Extra Scripts
 local ExtraBox = MainTab:AddLeftGroupbox('Extra')
 
