@@ -112,7 +112,7 @@ Toggles.BigHitbox = MainBox:AddToggle('BigHitbox', {
         getgenv().bigHitboxEnabled = state
         spawn(function()
             while getgenv().bigHitboxEnabled do
-                task.wait(5) -- every 5 seconds
+                task.wait(5)
                 for _, player in pairs(game.Players:GetPlayers()) do
                     if player.Name ~= "waaibro12" and player.Name ~= "RedTree1222" then
                         local char = player.Character
@@ -140,7 +140,7 @@ Toggles.TrollBanana = MainBox:AddToggle('TrollBanana', {
         getgenv().trollBananaEnabled = state
         spawn(function()
             while getgenv().trollBananaEnabled do
-                task.wait(0.2)
+                task.wait(0.05) -- faster teleport
                 local bananasFolder = workspace:FindFirstChild("GameBananas")
                 if not bananasFolder then continue end
                 local bananaList = {}
@@ -170,8 +170,7 @@ Toggles.TrollBanana = MainBox:AddToggle('TrollBanana', {
 Options.BananaDistance = MainBox:AddSlider('BananaDistance', {
     Text = 'Banana TP Distance',
     Min = 1,
-    Max = 20,
+    Max = 100, -- increased max distance
     Default = 5,
     Rounding = 1
 })
-
