@@ -167,7 +167,7 @@ MainBox:AddButton({
         local platform = Instance.new("Part")
         platform.Size = Vector3.new(20, 1, 20)
         platform.Anchored = true
-        platform.Position = hrp.Position + Vector3.new(0, 100, 0)
+        platform.Position = hrp.Position + Vector3.new(0, 50, 0)
         platform.Color = Color3.fromRGB(255, 255, 255)
         platform.Name = "SafePlatform"
         platform.Parent = workspace
