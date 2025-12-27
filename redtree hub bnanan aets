@@ -1,378 +1,169 @@
--- Load Fluent UI Library
-local Fluent = loadstring(
-    game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua")
-)()
+local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 
--- Create Main Window
-local Window = Fluent:CreateWindow({
-    Title = "REDTREE HUB",
-    SubTitle = "by RedTree",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = nil -- mobile safe
+local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
+local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
+local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+
+local Window = Library:CreateWindow({
+    Title = 'REDTREE HUB',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.15
 })
 
--- Tabs
 local Tabs = {
-    Movement = Window:AddTab({ Title = "Movement", Icon = "" }),
-    Extra = Window:AddTab({ Title = "Extra Scripts", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    Movement = Window:AddTab('Movement'),
+    Extra = Window:AddTab('Extra Scripts'),
+    ['UI Settings'] = Window:AddTab('UI Settings')
 }
 
-----------------------------------------------------------------
--- Movement Features
-----------------------------------------------------------------
+local MoveBox = Tabs.Movement:AddLeftGroupbox('Movement')
+local AutoBox = Tabs.Movement:AddRightGroupbox('Automation')
+local ExtraBox = Tabs.Extra:AddLeftGroupbox('Scripts')
 
--- WalkSpeed Toggle
-Tabs.Movement:AddToggle("WalkSpeed", {
-    Title = "WalkSpeed Boost",
-    Default = false,
-    Callback = function(state)
-        getgenv().walkSpeedEnabled = state
+-- WalkSpeed
+MoveBox:AddToggle('WalkSpeed', {
+    Text = 'WalkSpeed Boost',
+    Default = false
+})
 
-        task.spawn(function()
-            while getgenv().walkSpeedEnabled do
-                task.wait()
-                local humanoid = game.Players.LocalPlayer.Character
-                    and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+Toggles.WalkSpeed:OnChanged(function()
+    getgenv().ws = Toggles.WalkSpeed.Value
 
-                if humanoid then
-                    humanoid.WalkSpeed = 40
+    task.spawn(function()
+        while getgenv().ws do
+            task.wait()
+            local hum = game.Players.LocalPlayer.Character
+                and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid')
+            if hum then hum.WalkSpeed = 40 end
+        end
+
+        local hum = game.Players.LocalPlayer.Character
+            and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid')
+        if hum then hum.WalkSpeed = 16 end
+    end)
+end)
+
+-- Noclip
+MoveBox:AddToggle('Noclip', {
+    Text = 'Noclip',
+    Default = false
+})
+
+Toggles.Noclip:OnChanged(function()
+    getgenv().noclip = Toggles.Noclip.Value
+
+    task.spawn(function()
+        while getgenv().noclip do
+            task.wait()
+            local char = game.Players.LocalPlayer.Character
+            if not char then continue end
+
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA('BasePart') then
+                    v.CanCollide = false
                 end
             end
+        end
+    end)
+end)
 
-            local humanoid = game.Players.LocalPlayer.Character
-                and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+-- Teleport Safe Spot
+MoveBox:AddButton({
+    Text = 'Teleport Safe Spot',
+    Func = function()
+        local plr = game.Players.LocalPlayer
+        local char = plr.Character
+        if not char then return end
 
-            if humanoid then
-                humanoid.WalkSpeed = 16
-            end
-        end)
+        local hrp = char:FindFirstChild('HumanoidRootPart')
+        if not hrp then return end
+
+        local platform = Instance.new('Part', workspace)
+        platform.Size = Vector3.new(20,1,20)
+        platform.Anchored = true
+        platform.Position = Vector3.new(-287, 100, 621)
+
+        hrp.CFrame = platform.CFrame + Vector3.new(0,3,0)
     end
 })
 
--- Noclip Toggle
-Tabs.Movement:AddToggle("Noclip", {
-    Title = "Noclip",
-    Default = false,
-    Callback = function(state)
-        getgenv().noclipEnabled = state
-
-        task.spawn(function()
-            while getgenv().noclipEnabled do
-                task.wait()
-                local character = game.Players.LocalPlayer.Character
-                if not character then continue end
-
-                for _, part in pairs(character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end)
-    end
+-- Auto Eat
+AutoBox:AddToggle('AutoEat', {
+    Text = 'Auto Eat Players',
+    Default = false
 })
 
-----------------------------------------------------------------
--- Extra Scripts
-----------------------------------------------------------------
+Toggles.AutoEat:OnChanged(function()
+    getgenv().autoEat = Toggles.AutoEat.Value
+
+    task.spawn(function()
+        while getgenv().autoEat do
+            task.wait()
+            local char = game.Players.LocalPlayer.Character
+            if not char or not char:FindFirstChild('Hitbox') then continue end
+
+            for _, plr in pairs(game.Players:GetPlayers()) do
+                if plr ~= game.Players.LocalPlayer
+                    and plr.Character
+                    and plr.Character:FindFirstChild('HumanoidRootPart') then
+
+                    firetouchinterest(char.Hitbox, plr.Character.HumanoidRootPart, 0)
+                    firetouchinterest(char.Hitbox, plr.Character.HumanoidRootPart, 1)
+                end
+            end
+        end
+    end)
+end)
 
 -- Infinite Yield
-Tabs.Extra:AddButton({
-    Title = "Infinite Yield",
-    Description = "Admin command script",
-    Callback = function()
-        Window:Dialog({
-            Title = "Infinite Yield",
-            Content = "Do you want to run Infinite Yield?",
-            Buttons = {
-                {
-                    Title = "Run",
-                    Callback = function()
-                        loadstring(
-                            game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", true)
-                        )()
-                    end
-                },
-                { Title = "Cancel" }
-            }
-        })
-    end
-})
-
--- Banana Eats Script
-Tabs.Extra:AddButton({
-    Title = "Banana Eats Script",
-    Description = "Custom game script",
-    Callback = function()
-        Window:Dialog({
-            Title = "Run Script",
-            Content = "Do you want to run this script?",
-            Buttons = {
-                {
-                    Title = "Run",
-                    Callback = function()
-                        loadstring(
-                            game:HttpGet(
-                                "https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/main%20(2).lua",
-                                true
-                            )
-                        )()
-                    end
-                },
-                { Title = "Cancel" }
-            }
-        })
+ExtraBox:AddButton({
+    Text = 'Infinite Yield',
+    Func = function()
+        loadstring(
+            game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source', true)
+        )()
     end
 })
 
 -- ESP
-Tabs.Extra:AddButton({
-    Title = "ESP",
-    Description = "Enable ESP visuals",
-    Callback = function()
-        Window:Dialog({
-            Title = "ESP",
-            Content = "Run ESP script?",
-            Buttons = {
-                {
-                    Title = "Run",
-                    Callback = function()
-                        loadstring(
-                            game:HttpGet(
-                                "https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/esp",
-                                true
-                            )
-                        )()
-                    end
-                },
-                { Title = "Cancel" }
-            }
-        })
+ExtraBox:AddButton({
+    Text = 'ESP',
+    Func = function()
+        loadstring(
+            game:HttpGet(
+                'https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/esp',
+                true
+            )
+        )()
     end
 })
 
-----------------------------------------------------------------
--- Utility Features
-----------------------------------------------------------------
+-- UI Settings
+local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
 
--- Teleport to Safe Platform
-Tabs.Movement:AddButton({
-    Title = "Teleport to Safe Spot",
-    Description = "Teleports you to a floating platform",
-    Callback = function()
-        Window:Dialog({
-            Title = "Teleport",
-            Content = "Teleport to a safe location?",
-            Buttons = {
-                {
-                    Title = "Teleport",
-                    Callback = function()
-                        local player = game.Players.LocalPlayer
-                        local character = player.Character
-                        if not character then return end
-
-                        local hrp = character:FindFirstChild("HumanoidRootPart")
-                        if not hrp then return end
-
-                        local platform = Instance.new("Part", workspace)
-                        platform.Size = Vector3.new(20, 1, 20)
-                        platform.Position = Vector3.new(-287.15, 100.4, 621.55)
-                        platform.Anchored = true
-                        platform.Color = Color3.fromRGB(255, 255, 255)
-
-                        hrp.CFrame = platform.CFrame + Vector3.new(0, 3, 0)
-                    end
-                },
-                { Title = "Cancel" }
-            }
-        })
-    end
-})
-
-----------------------------------------------------------------
--- Automation
-----------------------------------------------------------------
-
--- Auto Eat Players
-Tabs.Movement:AddToggle("AutoEat", {
-    Title = "Auto Eat Players",
-    Default = false,
-    Callback = function(state)
-        getgenv().autoEat = state
-
-        task.spawn(function()
-            while getgenv().autoEat do
-                task.wait()
-                local character = game.Players.LocalPlayer.Character
-                if not character or not character:FindFirstChild("Hitbox") then continue end
-
-                for _, player in pairs(game.Players:GetPlayers()) do
-                    if player ~= game.Players.LocalPlayer
-                        and player.Character
-                        and player.Character:FindFirstChild("HumanoidRootPart") then
-
-                        firetouchinterest(character.Hitbox, player.Character.HumanoidRootPart, 0)
-                        firetouchinterest(character.Hitbox, player.Character.HumanoidRootPart, 1)
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- Auto Win
-Tabs.Movement:AddToggle("AutoWin", {
-    Title = "Auto Win",
-    Default = false,
-    Callback = function(state)
-        getgenv().autoWin = state
-
-        task.spawn(function()
-            while getgenv().autoWin do
-                task.wait()
-                local player = game.Players.LocalPlayer
-                if player.Team ~= game.Teams.Runners then continue end
-
-                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-
-                for _, exit in pairs(workspace.GameKeeper.Exits:GetChildren()) do
-                    if exit.Name == "EscapeDoor" and exit:FindFirstChild("Root") then
-                        firetouchinterest(hrp, exit.Root, 0)
-                        firetouchinterest(hrp, exit.Root, 1)
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- Auto Collect Coins
-Tabs.Movement:AddToggle("AutoCoin", {
-    Title = "Auto Collect Coins",
-    Default = false,
-    Callback = function(state)
-        getgenv().autoCoin = state
-
-        task.spawn(function()
-            while getgenv().autoCoin do
-                task.wait()
-                local hrp = game.Players.LocalPlayer.Character
-                    and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-
-                for _, folder in pairs(workspace.GameKeeper.Map:GetChildren()) do
-                    if folder.Name == "Tokens" then
-                        for _, token in pairs(folder:GetChildren()) do
-                            firetouchinterest(hrp, token, 0)
-                            firetouchinterest(hrp, token, 1)
-                        end
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- Auto Collect Power
-Tabs.Movement:AddToggle("AutoPower", {
-    Title = "Auto Collect Power",
-    Default = false,
-    Callback = function(state)
-        getgenv().autoPower = state
-
-        task.spawn(function()
-            while getgenv().autoPower do
-                task.wait()
-                local hrp = game.Players.LocalPlayer.Character
-                    and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-
-                for _, folder in pairs(workspace.GameKeeper.Map:GetChildren()) do
-                    if folder.Name == "Tokens" then
-                        for _, item in pairs(folder:GetChildren()) do
-                            if item:IsA("MeshPart") then
-                                firetouchinterest(hrp, item, 0)
-                                firetouchinterest(hrp, item, 1)
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-})
-
-----------------------------------------------------------------
--- MOBILE FLOATING TOGGLE BUTTON
-----------------------------------------------------------------
-
-local UIS = game:GetService("UserInputService")
-local PlayerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RedTreeFloatingToggle"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
-
-local Toggle = Instance.new("TextButton")
-Toggle.Parent = ScreenGui
-Toggle.Size = UDim2.fromOffset(40, 40)
-Toggle.Position = UDim2.new(0, 10, 0.5, -20)
-Toggle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Toggle.Text = "RT"
-Toggle.TextColor3 = Color3.new(1,1,1)
-Toggle.TextSize = 18
-Toggle.Font = Enum.Font.GothamBold
-Toggle.BorderSizePixel = 0
-Toggle.Active = true
-Toggle.ZIndex = 100
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1, 0)
-corner.Parent = Toggle
-
-local visible = true
-Toggle.MouseButton1Click:Connect(function()
-    visible = not visible
-    Window:SetVisible(visible)
+MenuGroup:AddButton('Unload', function()
+    Library:Unload()
 end)
 
--- Drag (mobile + pc)
-local dragging = false
-local dragStart, startPos
+MenuGroup:AddLabel('Menu Key'):AddKeyPicker('MenuKeybind', {
+    Default = 'End',
+    NoUI = true
+})
 
-Toggle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Toggle.Position
-    end
-end)
+Library.ToggleKeybind = Options.MenuKeybind
 
-Toggle.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
-end)
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
 
-UIS.InputChanged:Connect(function(input)
-    if dragging and
-       (input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch) then
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 
-        local delta = input.Position - dragStart
-        Toggle.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
-end)
+ThemeManager:SetFolder('RedTreeHub')
+SaveManager:SetFolder('RedTreeHub/Configs')
+
+SaveManager:BuildConfigSection(Tabs['UI Settings'])
+ThemeManager:ApplyToTab(Tabs['UI Settings'])
+
+SaveManager:LoadAutoloadConfig()
