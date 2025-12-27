@@ -163,12 +163,16 @@ MainBox:AddButton({
         if not char then return end
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
-        local platform = Instance.new("Part", workspace)
-        platform.Size = Vector3.new(20,1,20)
-        platform.Position = Vector3.new(-287.15,100.4,621.55)
+
+        local platform = Instance.new("Part")
+        platform.Size = Vector3.new(20, 1, 20)
         platform.Anchored = true
-        platform.Color = Color3.fromRGB(255,255,255)
-        hrp.CFrame = platform.CFrame + Vector3.new(0,3,0)
+        platform.Position = hrp.Position + Vector3.new(0, 100, 0)
+        platform.Color = Color3.fromRGB(255, 255, 255)
+        platform.Name = "SafePlatform"
+        platform.Parent = workspace
+
+        hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
     end
 })
 
