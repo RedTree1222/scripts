@@ -201,37 +201,62 @@ Toggles.BigHitbox = MainBox:AddToggle("BigHitbox", {
 })
 
 -- Troll Banana Toggle
-Toggles.TrollBanana = MainBox:AddToggle("TrollBanana", {
+Toggles.TrollBanana = MovementBox:AddToggle("TrollBanana", {
     Text = "Troll Banana",
     Default = false,
     Callback = function(state)
-        getgenv().trollBananaEnabled = state
+        getgenv().trollBanana = state
         spawn(function()
-            while getgenv().trollBananaEnabled do
-                task.wait(0.05)
+            while getgenv().trollBanana do
+                task.wait(0.05) -- faster teleport
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                if not char then continue end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then continue end
+
+                local GameBananas = workspace:FindFirstChild("GameBananas")
+                if not GameBananas then continue end
+
                 local bananas = {}
-                if workspace:FindFirstChild("GameBananas") then
-                    for _, bananaFolder in pairs(workspace.GameBananas:GetChildren()) do
-                        if bananaFolder.Name ~= "LobbyBananaAI" then
-                            table.insert(bananas, bananaFolder)
-                        end
+                for _, folder in pairs(GameBananas:GetChildren()) do
+                    if folder.Name ~= "LobbyBananaAI" then
+                        table.insert(bananas, folder)
                     end
                 end
-                if #bananas == 0 then continue end
-                local chosen = bananas[math.random(1, #bananas)]
-                local bananaModel = workspace:FindFirstChild(chosen.Name)
-                if bananaModel and bananaModel:FindFirstChild("HumanoidRootPart") then
-                    local playerChar = game.Players.LocalPlayer.Character
-                    if not playerChar or not playerChar:FindFirstChild("HumanoidRootPart") then continue end
-                    local hrp = playerChar.HumanoidRootPart
-                    local bHrp = bananaModel.HumanoidRootPart
-                    local direction = bHrp.CFrame.LookVector
-                    hrp.CFrame = CFrame.new(bHrp.Position + direction * 100, bHrp.Position)
+
+                if #bananas == 0 then
+                    task.wait(0.5)
+                    continue
                 end
+
+                local bananaFolder = bananas[math.random(1, #bananas)]
+                local bananaModel = workspace:FindFirstChild(bananaFolder.Name)
+                if not bananaModel then continue end
+
+                local bHrp = bananaModel:FindFirstChild("HumanoidRootPart")
+                if not bHrp then continue end
+
+                -- get direction the banana is facing
+                local direction = bHrp.CFrame.LookVector
+                local distance = Options.TrollBananaDistance.Value or 100
+
+                -- teleport player in front of banana
+                hrp.CFrame = CFrame.new(bHrp.Position + direction * distance, bHrp.Position)
             end
         end)
     end
 })
+
+-- Troll Banana distance slider
+Options.TrollBananaDistance = MovementBox:AddSlider("TrollBananaDistance", {
+    Text = "Troll Banana Distance",
+    Min = 10,
+    Max = 500,
+    Default = 100,
+    Rounding = 1
+})
+
 
 -- Extra Scripts Groupbox
 local ExtraBox = MainTab:AddLeftGroupbox('Extra')
