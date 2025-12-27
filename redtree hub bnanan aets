@@ -254,7 +254,7 @@ Toggles.TrollBanana = MainBox:AddToggle("Troll Banana", {
                 local targetModel = workspace:FindFirstChild(chosenBanana.Name)
                 if targetModel and targetModel:FindFirstChild("HumanoidRootPart") then
                     local bananaHRP = targetModel.HumanoidRootPart
-                    local newPos = bananaHRP.Position + (bananaHRP.CFrame.LookVector * 5)
+                    local newPos = bananaHRP.Position + (bananaHRP.CFrame.LookVector * 10)
                     hrp.CFrame = CFrame.new(newPos, bananaHRP.Position)
                 end
             end
