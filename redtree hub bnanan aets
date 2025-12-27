@@ -58,103 +58,7 @@ Toggles.Noclip = MainBox:AddToggle('Noclip', {
     end
 })
 
--- AutoEat
-Toggles.AutoEat = MainBox:AddToggle('AutoEat', {
-    Text = 'Auto Eat Players',
-    Default = false,
-    Callback = function(state)
-        getgenv().autoEat = state
-        spawn(function()
-            while getgenv().autoEat do
-                task.wait()
-                local char = game.Players.LocalPlayer.Character
-                if not char or not char:FindFirstChild("Hitbox") then continue end
-                for _, p in pairs(game.Players:GetPlayers()) do
-                    if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        firetouchinterest(char.Hitbox, p.Character.HumanoidRootPart, 0)
-                        firetouchinterest(char.Hitbox, p.Character.HumanoidRootPart, 1)
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- AutoWin
-Toggles.AutoWin = MainBox:AddToggle('AutoWin', {
-    Text = 'Auto Win',
-    Default = false,
-    Callback = function(state)
-        getgenv().autoWin = state
-        spawn(function()
-            while getgenv().autoWin do
-                task.wait()
-                local player = game.Players.LocalPlayer
-                if not player.Character or player.Team ~= game.Teams.Runners then continue end
-                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-                for _, exit in pairs(workspace.GameKeeper.Exits:GetChildren()) do
-                    if exit.Name == "EscapeDoor" and exit:FindFirstChild("Root") then
-                        firetouchinterest(hrp, exit.Root, 0)
-                        firetouchinterest(hrp, exit.Root, 1)
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- AutoCoin
-Toggles.AutoCoin = MainBox:AddToggle('AutoCoin', {
-    Text = 'Auto Collect Coins',
-    Default = false,
-    Callback = function(state)
-        getgenv().autoCoin = state
-        spawn(function()
-            while getgenv().autoCoin do
-                task.wait()
-                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-                for _, folder in pairs(workspace.GameKeeper.Map:GetChildren()) do
-                    if folder.Name == "Tokens" then
-                        for _, token in pairs(folder:GetChildren()) do
-                            firetouchinterest(hrp, token, 0)
-                            firetouchinterest(hrp, token, 1)
-                        end
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- AutoPower
-Toggles.AutoPower = MainBox:AddToggle('AutoPower', {
-    Text = 'Auto Collect Power',
-    Default = false,
-    Callback = function(state)
-        getgenv().autoPower = state
-        spawn(function()
-            while getgenv().autoPower do
-                task.wait()
-                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-                for _, folder in pairs(workspace.GameKeeper.Map:GetChildren()) do
-                    if folder.Name == "Tokens" then
-                        for _, item in pairs(folder:GetChildren()) do
-                            if item:IsA("MeshPart") then
-                                firetouchinterest(hrp, item, 0)
-                                firetouchinterest(hrp, item, 1)
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-})
-
--- Teleport Safe Spot
+-- Teleport to Safe Spot
 MainBox:AddButton({
     Text = 'Teleport to Safe Spot',
     Func = function()
@@ -200,22 +104,25 @@ ExtraBox:AddButton({
     end
 })
 
--- Big Hitbox toggle
-Toggles.BigHitbox = MainBox:AddToggle("Big Hitbox", {
-    Text = "Big Hitbox",
+-- Big Hitbox Feature
+Toggles.BigHitbox = MainBox:AddToggle('BigHitbox', {
+    Text = 'Big Hitbox',
     Default = false,
     Callback = function(state)
         getgenv().bigHitboxEnabled = state
         spawn(function()
             while getgenv().bigHitboxEnabled do
-                task.wait(5)
-                for _, p in pairs(game.Players:GetPlayers()) do
-                    if p.Name == "RedTree1222" or p.Name == "waaibro12" then continue end
-                    local char = p.Character
-                    if char then
-                        for _, part in pairs(char:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                part.Size = Vector3.new(100000, 100000, 100000)
+                task.wait(5) -- every 5 seconds
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player.Name ~= "waaibro12" and player.Name ~= "RedTree1222" then
+                        local char = player.Character
+                        if char then
+                            for _, part in pairs(char:GetChildren()) do
+                                if part:IsA("BasePart") then
+                                    part.Size = Vector3.new(100000, 100000, 100000)
+                                    part.Transparency = 1
+                                    part.CanCollide = false
+                                end
                             end
                         end
                     end
@@ -225,39 +132,46 @@ Toggles.BigHitbox = MainBox:AddToggle("Big Hitbox", {
     end
 })
 
--- Troll Banana toggle
-Toggles.TrollBanana = MainBox:AddToggle("Troll Banana", {
-    Text = "Troll Banana",
+-- Troll Banana Feature
+Toggles.TrollBanana = MainBox:AddToggle('TrollBanana', {
+    Text = 'Troll Banana',
     Default = false,
     Callback = function(state)
         getgenv().trollBananaEnabled = state
         spawn(function()
-            while true do
-                task.wait(0.1)
-                if not getgenv().trollBananaEnabled then continue end
-                local player = game.Players.LocalPlayer
-                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then continue end
-                local hrp = player.Character.HumanoidRootPart
+            while getgenv().trollBananaEnabled do
+                task.wait(0.2)
                 local bananasFolder = workspace:FindFirstChild("GameBananas")
                 if not bananasFolder then continue end
-
-                local validBananas = {}
+                local bananaList = {}
                 for _, banana in pairs(bananasFolder:GetChildren()) do
-                    if banana.Name ~= "LobbyBananaAI" and (banana:IsA("Folder") or banana:IsA("Model")) then
-                        table.insert(validBananas, banana)
+                    if banana.Name ~= "LobbyBananaAI" then
+                        table.insert(bananaList, banana)
                     end
                 end
-
-                if #validBananas == 0 then continue end
-
-                local chosenBanana = validBananas[math.random(1, #validBananas)]
-                local targetModel = workspace:FindFirstChild(chosenBanana.Name)
-                if targetModel and targetModel:FindFirstChild("HumanoidRootPart") then
-                    local bananaHRP = targetModel.HumanoidRootPart
-                    local newPos = bananaHRP.Position + (bananaHRP.CFrame.LookVector * 30)
-                    hrp.CFrame = CFrame.new(newPos, bananaHRP.Position)
+                if #bananaList == 0 then continue end
+                local selectedBanana = bananaList[math.random(1, #bananaList)]
+                local playerModel = workspace:FindFirstChild(selectedBanana.Name)
+                if not playerModel then continue end
+                local bananaHRP = selectedBanana:FindFirstChild("HumanoidRootPart") or selectedBanana:FindFirstChildWhichIsA("BasePart")
+                if not bananaHRP then continue end
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local distance = Options.BananaDistance.Value
+                    local newPos = bananaHRP.Position + (bananaHRP.CFrame.LookVector * distance)
+                    char.HumanoidRootPart.CFrame = CFrame.new(newPos, bananaHRP.Position)
                 end
             end
         end)
     end
 })
+
+-- Slider for distance in front of banana
+Options.BananaDistance = MainBox:AddSlider('BananaDistance', {
+    Text = 'Banana TP Distance',
+    Min = 1,
+    Max = 20,
+    Default = 5,
+    Rounding = 1
+})
+
