@@ -18,11 +18,10 @@ local Window = Library:CreateWindow({
 local MainTab = Window:AddTab('Main')
 local SettingsTab = Window:AddTab('Settings')
 
--- Movement Groupbox
-local MainBox = MainTab:AddLeftGroupbox('Movement')
+local MovementBox = MainTab:AddLeftGroupbox('Movement')
 
 -- WalkSpeed
-Toggles.WalkSpeed = MainBox:AddToggle('WalkSpeed', {
+Toggles.WalkSpeed = MovementBox:AddToggle('WalkSpeed', {
     Text = 'WalkSpeed Boost',
     Default = false,
     Callback = function(state)
@@ -40,7 +39,7 @@ Toggles.WalkSpeed = MainBox:AddToggle('WalkSpeed', {
 })
 
 -- Noclip
-Toggles.Noclip = MainBox:AddToggle('Noclip', {
+Toggles.Noclip = MovementBox:AddToggle('Noclip', {
     Text = 'Noclip',
     Default = false,
     Callback = function(state)
@@ -60,7 +59,7 @@ Toggles.Noclip = MainBox:AddToggle('Noclip', {
 })
 
 -- AutoEat
-Toggles.AutoEat = MainBox:AddToggle('AutoEat', {
+Toggles.AutoEat = MovementBox:AddToggle('AutoEat', {
     Text = 'Auto Eat Players',
     Default = false,
     Callback = function(state)
@@ -82,7 +81,7 @@ Toggles.AutoEat = MainBox:AddToggle('AutoEat', {
 })
 
 -- AutoWin
-Toggles.AutoWin = MainBox:AddToggle('AutoWin', {
+Toggles.AutoWin = MovementBox:AddToggle('AutoWin', {
     Text = 'Auto Win',
     Default = false,
     Callback = function(state)
@@ -106,7 +105,7 @@ Toggles.AutoWin = MainBox:AddToggle('AutoWin', {
 })
 
 -- AutoCoin
-Toggles.AutoCoin = MainBox:AddToggle('AutoCoin', {
+Toggles.AutoCoin = MovementBox:AddToggle('AutoCoin', {
     Text = 'Auto Collect Coins',
     Default = false,
     Callback = function(state)
@@ -130,7 +129,7 @@ Toggles.AutoCoin = MainBox:AddToggle('AutoCoin', {
 })
 
 -- AutoPower
-Toggles.AutoPower = MainBox:AddToggle('AutoPower', {
+Toggles.AutoPower = MovementBox:AddToggle('AutoPower', {
     Text = 'Auto Collect Power',
     Default = false,
     Callback = function(state)
@@ -155,8 +154,8 @@ Toggles.AutoPower = MainBox:AddToggle('AutoPower', {
     end
 })
 
--- Teleport to Safe Spot
-MainBox:AddButton({
+-- Teleport Button
+MovementBox:AddButton({
     Text = 'Teleport to Safe Spot',
     Func = function()
         local player = game.Players.LocalPlayer
@@ -177,27 +176,13 @@ MainBox:AddButton({
     end
 })
 
--- Big Hitbox Toggle
-Toggles.BigHitbox = MainBox:AddToggle("BigHitbox", {
-    Text = "Big Hitbox",
-    Default = false,
-    Callback = function(state)
-        getgenv().bigHitboxEnabled = state
-        spawn(function()
-            while getgenv().bigHitboxEnabled do
-                task.wait(5)
-                for _, player in pairs(game.Players:GetPlayers()) do
-                    if player.Name ~= "waaibro12" and player.Name ~= "RedTree1222" and player.Character then
-                        for _, part in pairs(player.Character:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                part.Size = Vector3.new(100000, 100000, 100000)
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
+-- Troll Banana Slider
+local TrollBananaDistance = MovementBox:AddSlider("TrollBananaDistance", {
+    Text = "Troll Banana Distance",
+    Min = 10,
+    Max = 100, -- default max
+    Default = 100,
+    Rounding = 1
 })
 
 -- Troll Banana Toggle
@@ -239,7 +224,7 @@ Toggles.TrollBanana = MovementBox:AddToggle("TrollBanana", {
 
                 -- get direction the banana is facing
                 local direction = bHrp.CFrame.LookVector
-                local distance = Options.TrollBananaDistance.Value or 100
+                local distance = TrollBananaDistance.Value -- read slider value dynamically
 
                 -- teleport player in front of banana
                 hrp.CFrame = CFrame.new(bHrp.Position + direction * distance, bHrp.Position)
@@ -248,17 +233,7 @@ Toggles.TrollBanana = MovementBox:AddToggle("TrollBanana", {
     end
 })
 
--- Troll Banana distance slider
-Options.TrollBananaDistance = MovementBox:AddSlider("TrollBananaDistance", {
-    Text = "Troll Banana Distance",
-    Min = 10,
-    Max = 500,
-    Default = 100,
-    Rounding = 1
-})
-
-
--- Extra Scripts Groupbox
+-- Extra Scripts
 local ExtraBox = MainTab:AddLeftGroupbox('Extra')
 
 ExtraBox:AddButton({
