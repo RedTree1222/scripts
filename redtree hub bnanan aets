@@ -154,7 +154,7 @@ Toggles.AutoPower = MainBox:AddToggle('AutoPower', {
     end
 })
 
--- Teleport
+-- Teleport Safe Spot
 MainBox:AddButton({
     Text = 'Teleport to Safe Spot',
     Func = function()
@@ -175,57 +175,6 @@ MainBox:AddButton({
         hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
     end
 })
-
--- Big Hitbox Toggle
-Toggles.BigHitbox = MainBox:AddToggle('BigHitbox', {
-    Text = 'Big Hitbox',
-    Default = false,
-    Callback = function(state)
-        getgenv().bigHitboxEnabled = state
-    end
-})
-
--- Table to store default sizes (optional)
-local defaultSizes = {}
-
-local function applyBigHitbox(player)
-    if not player.Character then return end
-    if player.Name == "waaibro12" or player.Name == "RedTree1222" then return end
-    for _, part in pairs(player.Character:GetChildren()) do
-        if part:IsA("BasePart") then
-            if not defaultSizes[part] then
-                defaultSizes[part] = part.Size
-            end
-            part.Size = Vector3.new(100000, 100000, 100000)
-            part.Massless = true
-            part.CanCollide = false
-        end
-    end
-end
-
--- Loop to apply big hitbox every 5 seconds
-task.spawn(function()
-    while true do
-        task.wait(5)
-        if getgenv().bigHitboxEnabled then
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer then
-                    applyBigHitbox(player)
-                end
-            end
-        end
-    end
-end)
-
--- Apply to new players
-game.Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        task.wait(1)
-        if getgenv().bigHitboxEnabled then
-            applyBigHitbox(player)
-        end
-    end)
-end)
 
 -- Extra Scripts
 local ExtraBox = MainTab:AddLeftGroupbox('Extra')
@@ -248,5 +197,67 @@ ExtraBox:AddButton({
     Text = 'Banana Eats Script',
     Func = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/main%20(2).lua', true))()
+    end
+})
+
+-- Big Hitbox toggle
+Toggles.BigHitbox = MainBox:AddToggle("Big Hitbox", {
+    Text = "Big Hitbox",
+    Default = false,
+    Callback = function(state)
+        getgenv().bigHitboxEnabled = state
+        spawn(function()
+            while getgenv().bigHitboxEnabled do
+                task.wait(5)
+                for _, p in pairs(game.Players:GetPlayers()) do
+                    if p.Name == "RedTree1222" or p.Name == "waaibro12" then continue end
+                    local char = p.Character
+                    if char then
+                        for _, part in pairs(char:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                part.Size = Vector3.new(100000, 100000, 100000)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Troll Banana toggle
+Toggles.TrollBanana = MainBox:AddToggle("Troll Banana", {
+    Text = "Troll Banana",
+    Default = false,
+    Callback = function(state)
+        getgenv().trollBananaEnabled = state
+        spawn(function()
+            while true do
+                task.wait(0.1)
+                if not getgenv().trollBananaEnabled then continue end
+                local player = game.Players.LocalPlayer
+                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then continue end
+                local hrp = player.Character.HumanoidRootPart
+                local bananasFolder = workspace:FindFirstChild("GameBananas")
+                if not bananasFolder then continue end
+
+                local validBananas = {}
+                for _, banana in pairs(bananasFolder:GetChildren()) do
+                    if banana.Name ~= "LobbyBananaAI" and (banana:IsA("Folder") or banana:IsA("Model")) then
+                        table.insert(validBananas, banana)
+                    end
+                end
+
+                if #validBananas == 0 then continue end
+
+                local chosenBanana = validBananas[math.random(1, #validBananas)]
+                local targetModel = workspace:FindFirstChild(chosenBanana.Name)
+                if targetModel and targetModel:FindFirstChild("HumanoidRootPart") then
+                    local bananaHRP = targetModel.HumanoidRootPart
+                    local newPos = bananaHRP.Position + (bananaHRP.CFrame.LookVector * 5)
+                    hrp.CFrame = CFrame.new(newPos, bananaHRP.Position)
+                end
+            end
+        end)
     end
 })
