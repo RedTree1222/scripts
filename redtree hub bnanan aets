@@ -5,151 +5,227 @@ local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))
 local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'REDTREE HUB',
+    Title = 'Example menu',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
-    MenuFadeTime = 0.15
+    MenuFadeTime = 0.2,
+    ShowCustomCursor = false
 })
+
+task.spawn(function()
+    local UIS = game:GetService("UserInputService")
+    if not UIS.TouchEnabled then return end
+    task.wait(0.5)
+    Library:SetDPIScale(75)
+end)
 
 local Tabs = {
-    Movement = Window:AddTab('Movement'),
-    Extra = Window:AddTab('Extra Scripts'),
-    ['UI Settings'] = Window:AddTab('UI Settings')
+    Main = Window:AddTab('Main'),
+    ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
-local MoveBox = Tabs.Movement:AddLeftGroupbox('Movement')
-local AutoBox = Tabs.Movement:AddRightGroupbox('Automation')
-local ExtraBox = Tabs.Extra:AddLeftGroupbox('Scripts')
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox('Groupbox')
 
--- WalkSpeed
-MoveBox:AddToggle('WalkSpeed', {
-    Text = 'WalkSpeed Boost',
-    Default = false
-})
-
-Toggles.WalkSpeed:OnChanged(function()
-    getgenv().ws = Toggles.WalkSpeed.Value
-
-    task.spawn(function()
-        while getgenv().ws do
-            task.wait()
-            local hum = game.Players.LocalPlayer.Character
-                and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid')
-            if hum then hum.WalkSpeed = 40 end
-        end
-
-        local hum = game.Players.LocalPlayer.Character
-            and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid')
-        if hum then hum.WalkSpeed = 16 end
-    end)
-end)
-
--- Noclip
-MoveBox:AddToggle('Noclip', {
-    Text = 'Noclip',
-    Default = false
-})
-
-Toggles.Noclip:OnChanged(function()
-    getgenv().noclip = Toggles.Noclip.Value
-
-    task.spawn(function()
-        while getgenv().noclip do
-            task.wait()
-            local char = game.Players.LocalPlayer.Character
-            if not char then continue end
-
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA('BasePart') then
-                    v.CanCollide = false
-                end
-            end
-        end
-    end)
-end)
-
--- Teleport Safe Spot
-MoveBox:AddButton({
-    Text = 'Teleport Safe Spot',
-    Func = function()
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character
-        if not char then return end
-
-        local hrp = char:FindFirstChild('HumanoidRootPart')
-        if not hrp then return end
-
-        local platform = Instance.new('Part', workspace)
-        platform.Size = Vector3.new(20,1,20)
-        platform.Anchored = true
-        platform.Position = Vector3.new(-287, 100, 621)
-
-        hrp.CFrame = platform.CFrame + Vector3.new(0,3,0)
+LeftGroupBox:AddToggle('MyToggle', {
+    Text = 'This is a toggle',
+    Default = true,
+    Tooltip = 'This is a tooltip',
+    Callback = function(Value)
+        print('MyToggle:', Value)
     end
 })
 
--- Auto Eat
-AutoBox:AddToggle('AutoEat', {
-    Text = 'Auto Eat Players',
-    Default = false
-})
-
-Toggles.AutoEat:OnChanged(function()
-    getgenv().autoEat = Toggles.AutoEat.Value
-
-    task.spawn(function()
-        while getgenv().autoEat do
-            task.wait()
-            local char = game.Players.LocalPlayer.Character
-            if not char or not char:FindFirstChild('Hitbox') then continue end
-
-            for _, plr in pairs(game.Players:GetPlayers()) do
-                if plr ~= game.Players.LocalPlayer
-                    and plr.Character
-                    and plr.Character:FindFirstChild('HumanoidRootPart') then
-
-                    firetouchinterest(char.Hitbox, plr.Character.HumanoidRootPart, 0)
-                    firetouchinterest(char.Hitbox, plr.Character.HumanoidRootPart, 1)
-                end
-            end
-        end
-    end)
+Toggles.MyToggle:OnChanged(function()
+    print('MyToggle changed:', Toggles.MyToggle.Value)
 end)
 
--- Infinite Yield
-ExtraBox:AddButton({
-    Text = 'Infinite Yield',
+Toggles.MyToggle:SetValue(false)
+
+local MyButton = LeftGroupBox:AddButton({
+    Text = 'Button',
     Func = function()
-        loadstring(
-            game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source', true)
-        )()
+        print('Button clicked')
+    end,
+    Tooltip = 'This is the main button'
+})
+
+MyButton:AddButton({
+    Text = 'Sub button',
+    Func = function()
+        print('Sub button clicked')
+    end,
+    DoubleClick = true
+})
+
+LeftGroupBox:AddLabel('This is a label')
+LeftGroupBox:AddLabel('This is a label\n\nwhich wraps its text!', true)
+LeftGroupBox:AddDivider()
+
+LeftGroupBox:AddSlider('MySlider', {
+    Text = 'This is my slider!',
+    Default = 0,
+    Min = 0,
+    Max = 5,
+    Rounding = 1,
+    Callback = function(Value)
+        print('Slider:', Value)
     end
 })
 
--- ESP
-ExtraBox:AddButton({
-    Text = 'ESP',
-    Func = function()
-        loadstring(
-            game:HttpGet(
-                'https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/esp',
-                true
-            )
-        )()
+Options.MySlider:OnChanged(function()
+    print('Slider changed:', Options.MySlider.Value)
+end)
+
+Options.MySlider:SetValue(3)
+
+LeftGroupBox:AddInput('MyTextbox', {
+    Default = 'My textbox!',
+    Finished = false,
+    Text = 'This is a textbox',
+    Placeholder = 'Placeholder',
+    Callback = function(Value)
+        print('Textbox:', Value)
     end
 })
 
--- UI Settings
+Options.MyTextbox:OnChanged(function()
+    print('Textbox changed:', Options.MyTextbox.Value)
+end)
+
+LeftGroupBox:AddDropdown('MyDropdown', {
+    Values = { 'This', 'is', 'a', 'dropdown' },
+    Default = 1,
+    Text = 'A dropdown',
+    Callback = function(Value)
+        print('Dropdown:', Value)
+    end
+})
+
+Options.MyDropdown:SetValue('This')
+
+LeftGroupBox:AddDropdown('MyMultiDropdown', {
+    Values = { 'This', 'is', 'a', 'dropdown' },
+    Default = 1,
+    Multi = true,
+    Text = 'Multi dropdown',
+    Callback = function(Value)
+        print('Multi dropdown:', Value)
+    end
+})
+
+Options.MyMultiDropdown:SetValue({
+    This = true,
+    is = true,
+})
+
+LeftGroupBox:AddDropdown('MyPlayerDropdown', {
+    SpecialType = 'Player',
+    Text = 'Player dropdown',
+    Callback = function(Value)
+        print('Player:', Value)
+    end
+})
+
+LeftGroupBox:AddLabel('Color'):AddColorPicker('ColorPicker', {
+    Default = Color3.fromRGB(0, 255, 0),
+    Callback = function(Value)
+        print('Color:', Value)
+    end
+})
+
+Options.ColorPicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
+
+LeftGroupBox:AddLabel('Keybind'):AddKeyPicker('KeyPicker', {
+    Default = 'MB2',
+    Mode = 'Toggle',
+    Text = 'Example keybind',
+    Callback = function(Value)
+        print('Keybind:', Value)
+    end
+})
+
+Options.KeyPicker:SetValue({ 'MB2', 'Toggle' })
+
+local LeftGroupBox2 = Tabs.Main:AddLeftGroupbox('Groupbox #2')
+LeftGroupBox2:AddLabel(
+    'Oh no...\nThis label spans multiple lines!\n\nScroll works fine.\n\nHello from below!',
+    true
+)
+
+local TabBox = Tabs.Main:AddRightTabbox()
+
+local Tab1 = TabBox:AddTab('Tab 1')
+Tab1:AddToggle('Tab1Toggle', { Text = 'Tab1 Toggle' })
+
+local Tab2 = TabBox:AddTab('Tab 2')
+Tab2:AddToggle('Tab2Toggle', { Text = 'Tab2 Toggle' })
+
+local RightGroupbox = Tabs.Main:AddRightGroupbox('Groupbox #3')
+RightGroupbox:AddToggle('ControlToggle', { Text = 'Dependency toggle' })
+
+local Depbox = RightGroupbox:AddDependencyBox()
+Depbox:AddToggle('DepboxToggle', { Text = 'Sub toggle' })
+
+local SubDepbox = Depbox:AddDependencyBox()
+SubDepbox:AddSlider('DepboxSlider', {
+    Text = 'Slider',
+    Default = 50,
+    Min = 0,
+    Max = 100,
+    Rounding = 0
+})
+
+SubDepbox:AddDropdown('DepboxDropdown', {
+    Text = 'Dropdown',
+    Default = 1,
+    Values = { 'a', 'b', 'c' }
+})
+
+Depbox:SetupDependencies({
+    { Toggles.ControlToggle, true }
+})
+
+SubDepbox:SetupDependencies({
+    { Toggles.DepboxToggle, true }
+})
+
+Library:SetWatermarkVisibility(true)
+
+local FrameTimer = tick()
+local FrameCounter = 0
+local FPS = 60
+
+local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()
+    FrameCounter += 1
+    if tick() - FrameTimer >= 1 then
+        FPS = FrameCounter
+        FrameCounter = 0
+        FrameTimer = tick()
+    end
+
+    Library:SetWatermark(
+        ('Linoria | %s fps | %s ms'):format(
+            math.floor(FPS),
+            math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
+        )
+    )
+end)
+
+Library:OnUnload(function()
+    WatermarkConnection:Disconnect()
+    Library.Unloaded = true
+end)
+
 local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
-
 MenuGroup:AddButton('Unload', function()
     Library:Unload()
 end)
 
-MenuGroup:AddLabel('Menu Key'):AddKeyPicker('MenuKeybind', {
+MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {
     Default = 'End',
-    NoUI = true
+    NoUI = true,
+    Text = 'Menu keybind'
 })
 
 Library.ToggleKeybind = Options.MenuKeybind
@@ -160,8 +236,8 @@ SaveManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 
-ThemeManager:SetFolder('RedTreeHub')
-SaveManager:SetFolder('RedTreeHub/Configs')
+ThemeManager:SetFolder('MyScriptHub')
+SaveManager:SetFolder('MyScriptHub/specific-game')
 
 SaveManager:BuildConfigSection(Tabs['UI Settings'])
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
