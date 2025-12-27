@@ -11,7 +11,7 @@ local Window = Fluent:CreateWindow({
     Size = UDim2.fromOffset(580, 460),
     Acrylic = true,
     Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
+    MinimizeKey = nil -- IMPORTANT: no keybind (mobile safe)
 })
 
 -- Tabs
@@ -21,160 +21,89 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
-------------------------------------------------
--- Movement
-------------------------------------------------
+----------------------------------------------------
+-- MOVEMENT
+----------------------------------------------------
 
+-- WalkSpeed
 Tabs.Movement:AddToggle("WalkSpeed", {
     Title = "WalkSpeed Boost",
     Default = false,
     Callback = function(state)
-        getgenv().walkSpeed = state
-        while getgenv().walkSpeed do
-            task.wait()
+        getgenv().ws = state
+
+        task.spawn(function()
+            while getgenv().ws do
+                task.wait()
+                local hum = game.Players.LocalPlayer.Character
+                    and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+                if hum then
+                    hum.WalkSpeed = 40
+                end
+            end
+
             local hum = game.Players.LocalPlayer.Character
                 and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
             if hum then
-                hum.WalkSpeed = 40
+                hum.WalkSpeed = 16
             end
-        end
-        local hum = game.Players.LocalPlayer.Character
-            and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-        if hum then
-            hum.WalkSpeed = 16
-        end
+        end)
     end
 })
 
+-- Noclip
 Tabs.Movement:AddToggle("Noclip", {
     Title = "Noclip",
     Default = false,
     Callback = function(state)
         getgenv().noclip = state
-        while getgenv().noclip do
-            task.wait()
-            local char = game.Players.LocalPlayer.Character
-            if not char then continue end
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
+
+        task.spawn(function()
+            while getgenv().noclip do
+                task.wait()
+                local char = game.Players.LocalPlayer.Character
+                if not char then continue end
+
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
                 end
             end
-        end
+        end)
     end
 })
 
-------------------------------------------------
--- Extra Scripts
-------------------------------------------------
+----------------------------------------------------
+-- EXTRA SCRIPTS
+----------------------------------------------------
 
 Tabs.Extra:AddButton({
     Title = "Infinite Yield",
     Description = "Admin commands",
     Callback = function()
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", true
-        ))()
-    end
-})
-
-Tabs.Extra:AddButton({
-    Title = "Banana Eats Script",
-    Description = "Game script",
-    Callback = function()
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/main%20(2).lua",
-            true
-        ))()
+        loadstring(
+            game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", true)
+        )()
     end
 })
 
 Tabs.Extra:AddButton({
     Title = "ESP",
-    Description = "Visual ESP",
+    Description = "Player ESP",
     Callback = function()
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/esp",
-            true
-        ))()
+        loadstring(
+            game:HttpGet(
+                "https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/esp",
+                true
+            )
+        )()
     end
 })
 
-------------------------------------------------
--- Utility
-------------------------------------------------
-
-Tabs.Movement:AddButton({
-    Title = "Teleport to Safe Spot",
-    Callback = function()
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character
-        if not char then return end
-
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-
-        local platform = Instance.new("Part", workspace)
-        platform.Size = Vector3.new(20, 1, 20)
-        platform.Anchored = true
-        platform.Position = Vector3.new(-287, 100, 621)
-        platform.Color = Color3.fromRGB(255, 255, 255)
-
-        hrp.CFrame = platform.CFrame + Vector3.new(0, 3, 0)
-    end
-})
-
-------------------------------------------------
--- Automation
-------------------------------------------------
-
-Tabs.Movement:AddToggle("AutoEat", {
-    Title = "Auto Eat Players",
-    Default = false,
-    Callback = function(state)
-        getgenv().autoEat = state
-        while getgenv().autoEat do
-            task.wait()
-            local char = game.Players.LocalPlayer.Character
-            if not char or not char:FindFirstChild("Hitbox") then continue end
-
-            for _, p in pairs(game.Players:GetPlayers()) do
-                if p ~= game.Players.LocalPlayer and p.Character
-                    and p.Character:FindFirstChild("HumanoidRootPart") then
-                    firetouchinterest(char.Hitbox, p.Character.HumanoidRootPart, 0)
-                    firetouchinterest(char.Hitbox, p.Character.HumanoidRootPart, 1)
-                end
-            end
-        end
-    end
-})
-
-Tabs.Movement:AddToggle("AutoWin", {
-    Title = "Auto Win",
-    Default = false,
-    Callback = function(state)
-        getgenv().autoWin = state
-        while getgenv().autoWin do
-            task.wait()
-            local plr = game.Players.LocalPlayer
-            if plr.Team ~= game.Teams.Runners then continue end
-
-            local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-            if not hrp then continue end
-
-            for _, exit in pairs(workspace.GameKeeper.Exits:GetChildren()) do
-                if exit.Name == "EscapeDoor" and exit:FindFirstChild("Root") then
-                    firetouchinterest(hrp, exit.Root, 0)
-                    firetouchinterest(hrp, exit.Root, 1)
-                end
-            end
-        end
-    end
-})
-
-------------------------------------------------
--- FLOATING TOGGLE BUTTON (DRAGGABLE)
-------------------------------------------------
+----------------------------------------------------
+-- MOBILE FLOATING TOGGLE BUTTON
+----------------------------------------------------
 
 local UIS = game:GetService("UserInputService")
 local PlayerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -187,25 +116,58 @@ ScreenGui.Parent = PlayerGui
 local Button = Instance.new("TextButton")
 Button.Parent = ScreenGui
 Button.Size = UDim2.fromOffset(42, 42)
-Button.Position = UDim2.new(0, 12, 0.5, -21) -- left center
+Button.Position = UDim2.new(0, 10, 0.5, -21)
 Button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Button.Text = "RT"
-Button.TextColor3 = Color3.new(1, 1, 1)
 Button.TextSize = 18
+Button.TextColor3 = Color3.new(1,1,1)
 Button.Font = Enum.Font.GothamBold
 Button.BorderSizePixel = 0
 Button.Active = true
+Button.ZIndex = 50
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 10)
-Corner.Parent = Button
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0)
+corner.Parent = Button
 
-local uiOpen = true
+-- Toggle UI
+local open = true
 Button.MouseButton1Click:Connect(function()
-    uiOpen = not uiOpen
-    Window:SetVisible(uiOpen)
+    open = not open
+    Window:SetVisible(open)
 end)
 
--- Drag logic
+-- Drag (mobile + PC)
 local dragging = false
-local dragStart, start
+local dragStart, startPos
+
+Button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Button.Position
+    end
+end)
+
+Button.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and
+       (input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch) then
+
+        local delta = input.Position - dragStart
+        Button.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
