@@ -187,7 +187,6 @@ Toggles.TrollBanana = TrollBox:AddToggle("Troll Banana", {
         getgenv().trollBanana = state
         spawn(function()
             while getgenv().trollBanana do
-                task.wait(0.1)
                 local bananas = {}
                 for _, folder in pairs(workspace:WaitForChild("GameBananas"):GetChildren()) do
                     if folder.Name ~= "LobbyBananaAI" then
