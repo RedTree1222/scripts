@@ -178,46 +178,55 @@ MainBox:AddButton({
 })
 
 -- Troll Banana
-local TrollBox = MainTab:AddLeftGroupbox('Troll Banana')
-Toggles.TrollBanana = TrollBox:AddToggle('TrollBanana', {
-    Text = 'Enable Troll Banana',
+local TrollBox = MainTab:AddLeftGroupbox("Troll Banana")
+
+Toggles.TrollBanana = TrollBox:AddToggle("Troll Banana", {
+    Text = "Troll Banana",
     Default = false,
     Callback = function(state)
-        getgenv().trollBananaEnabled = state
+        getgenv().trollBanana = state
         spawn(function()
-            while getgenv().trollBananaEnabled do
+            while getgenv().trollBanana do
                 task.wait(0.1)
                 local bananas = {}
-                local folder = workspace:FindFirstChild("GameBananas")
-                if folder then
-                    for _, banana in pairs(folder:GetChildren()) do
-                        if banana.Name ~= "LobbyBananaAI" then
-                            table.insert(bananas, banana)
-                        end
+                for _, folder in pairs(workspace:WaitForChild("GameBananas"):GetChildren()) do
+                    if folder.Name ~= "LobbyBananaAI" then
+                        table.insert(bananas, folder)
                     end
                 end
+
                 if #bananas > 0 then
-                    local chosen = bananas[math.random(1,#bananas)]
-                    local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        local fwd = chosen.CFrame.LookVector * (getgenv().trollDistance or 5)
-                        hrp.CFrame = CFrame.new(chosen.Position + fwd, chosen.Position)
+                    local bananaFolder = bananas[math.random(1, #bananas)]
+                    local bananaName = bananaFolder.Name
+                    local playerModel = workspace:FindFirstChild(bananaName)
+                    if playerModel then
+                        local hrp = playerModel:FindFirstChild("HumanoidRootPart") or playerModel:FindFirstChildWhichIsA("BasePart")
+                        if hrp then
+                            local distance = getgenv().bananaDistance or 5
+                            local newPos = hrp.Position + (hrp.CFrame.LookVector * distance)
+                            local plrHRP = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if plrHRP then
+                                plrHRP.CFrame = CFrame.new(newPos, hrp.Position)
+                            end
+                        end
                     end
                 end
             end
         end)
     end
 })
-Toggles.TrollDistance = TrollBox:AddSlider('TrollDistance', {
-    Text = 'Distance',
-    Default = 5,
+
+TrollBox:AddSlider("Banana Distance", {
+    Text = "Distance",
     Min = 5,
     Max = 100,
+    Default = 5,
     Rounding = 1,
-    Callback = function(v)
-        getgenv().trollDistance = v
+    Callback = function(value)
+        getgenv().bananaDistance = value
     end
 })
+
 
 -- Extra Scripts
 local ExtraBox = MainTab:AddLeftGroupbox('Extra')
