@@ -210,10 +210,13 @@ Toggles.TrollBanana = TrollBox:AddToggle("Troll Banana", {
                         end
                     end
                 end
+
+                task.wait(0.03)
             end
         end)
     end
 })
+
 
 TrollBox:AddSlider("Banana Distance", {
     Text = "Distance",
