@@ -18,10 +18,11 @@ local Window = Library:CreateWindow({
 local MainTab = Window:AddTab('Main')
 local SettingsTab = Window:AddTab('Settings')
 
-local MovementBox = MainTab:AddLeftGroupbox('Movement')
+-- Movement
+local MainBox = MainTab:AddLeftGroupbox('Movement')
 
 -- WalkSpeed
-Toggles.WalkSpeed = MovementBox:AddToggle('WalkSpeed', {
+Toggles.WalkSpeed = MainBox:AddToggle('WalkSpeed', {
     Text = 'WalkSpeed Boost',
     Default = false,
     Callback = function(state)
@@ -39,7 +40,7 @@ Toggles.WalkSpeed = MovementBox:AddToggle('WalkSpeed', {
 })
 
 -- Noclip
-Toggles.Noclip = MovementBox:AddToggle('Noclip', {
+Toggles.Noclip = MainBox:AddToggle('Noclip', {
     Text = 'Noclip',
     Default = false,
     Callback = function(state)
@@ -59,7 +60,7 @@ Toggles.Noclip = MovementBox:AddToggle('Noclip', {
 })
 
 -- AutoEat
-Toggles.AutoEat = MovementBox:AddToggle('AutoEat', {
+Toggles.AutoEat = MainBox:AddToggle('AutoEat', {
     Text = 'Auto Eat Players',
     Default = false,
     Callback = function(state)
@@ -81,7 +82,7 @@ Toggles.AutoEat = MovementBox:AddToggle('AutoEat', {
 })
 
 -- AutoWin
-Toggles.AutoWin = MovementBox:AddToggle('AutoWin', {
+Toggles.AutoWin = MainBox:AddToggle('AutoWin', {
     Text = 'Auto Win',
     Default = false,
     Callback = function(state)
@@ -105,7 +106,7 @@ Toggles.AutoWin = MovementBox:AddToggle('AutoWin', {
 })
 
 -- AutoCoin
-Toggles.AutoCoin = MovementBox:AddToggle('AutoCoin', {
+Toggles.AutoCoin = MainBox:AddToggle('AutoCoin', {
     Text = 'Auto Collect Coins',
     Default = false,
     Callback = function(state)
@@ -129,7 +130,7 @@ Toggles.AutoCoin = MovementBox:AddToggle('AutoCoin', {
 })
 
 -- AutoPower
-Toggles.AutoPower = MovementBox:AddToggle('AutoPower', {
+Toggles.AutoPower = MainBox:AddToggle('AutoPower', {
     Text = 'Auto Collect Power',
     Default = false,
     Callback = function(state)
@@ -154,8 +155,8 @@ Toggles.AutoPower = MovementBox:AddToggle('AutoPower', {
     end
 })
 
--- Teleport Safe Spot
-MovementBox:AddButton({
+-- Teleport
+MainBox:AddButton({
     Text = 'Teleport to Safe Spot',
     Func = function()
         local player = game.Players.LocalPlayer
@@ -176,60 +177,45 @@ MovementBox:AddButton({
     end
 })
 
--- Troll Banana Slider
-local TrollBananaDistance = MovementBox:AddSlider("TrollBananaDistance", {
-    Text = "Troll Banana Distance",
-    Min = 10,
-    Max = 100,
-    Default = 100,
-    Rounding = 1
-})
-
--- Troll Banana Toggle
-Toggles.TrollBanana = MovementBox:AddToggle("TrollBanana", {
-    Text = "Troll Banana",
+-- Troll Banana
+local TrollBox = MainTab:AddLeftGroupbox('Troll Banana')
+Toggles.TrollBanana = TrollBox:AddToggle('TrollBanana', {
+    Text = 'Enable Troll Banana',
     Default = false,
     Callback = function(state)
-        getgenv().trollBanana = state
+        getgenv().trollBananaEnabled = state
         spawn(function()
-            while getgenv().trollBanana do
-                task.wait(0.05) -- faster teleport
-                local player = game.Players.LocalPlayer
-                local char = player.Character
-                if not char then continue end
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-
-                local GameBananas = workspace:FindFirstChild("GameBananas")
-                if not GameBananas then continue end
-
+            while getgenv().trollBananaEnabled do
+                task.wait(0.1)
                 local bananas = {}
-                for _, folder in pairs(GameBananas:GetChildren()) do
-                    if folder.Name ~= "LobbyBananaAI" then
-                        table.insert(bananas, folder)
+                local folder = workspace:FindFirstChild("GameBananas")
+                if folder then
+                    for _, banana in pairs(folder:GetChildren()) do
+                        if banana.Name ~= "LobbyBananaAI" then
+                            table.insert(bananas, banana)
+                        end
                     end
                 end
-
-                if #bananas == 0 then
-                    task.wait(0.5)
-                    continue
+                if #bananas > 0 then
+                    local chosen = bananas[math.random(1,#bananas)]
+                    local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        local fwd = chosen.CFrame.LookVector * (getgenv().trollDistance or 5)
+                        hrp.CFrame = CFrame.new(chosen.Position + fwd, chosen.Position)
+                    end
                 end
-
-                local bananaFolder = bananas[math.random(1, #bananas)]
-                local bananaModel = workspace:FindFirstChild(bananaFolder.Name)
-                if not bananaModel then continue end
-
-                local bHrp = bananaModel:FindFirstChild("HumanoidRootPart")
-                if not bHrp then continue end
-
-                -- direction banana is facing
-                local direction = bHrp.CFrame.LookVector
-                local distance = TrollBananaDistance.Value
-
-                -- teleport player in front of banana
-                hrp.CFrame = CFrame.new(bHrp.Position + direction * distance, bHrp.Position)
             end
         end)
+    end
+})
+Toggles.TrollDistance = TrollBox:AddSlider('TrollDistance', {
+    Text = 'Distance',
+    Default = 5,
+    Min = 5,
+    Max = 100,
+    Rounding = 1,
+    Callback = function(v)
+        getgenv().trollDistance = v
     end
 })
 
@@ -254,5 +240,205 @@ ExtraBox:AddButton({
     Text = 'Banana Eats Script',
     Func = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/RedTree1222/scripts/refs/heads/main/main%20(2).lua', true))()
+    end
+})
+
+-- Misc Features (from linked script)
+local MiscBox = MainTab:AddLeftGroupbox('Misc')
+
+MiscBox:AddToggle('AntiAFK', {
+    Text = 'Anti AFK',
+    Default = true,
+    Callback = function()
+        game:GetService("Players").LocalPlayer.Idled:Connect(function()
+            game:GetService("VirtualUser"):CaptureController()
+            game:GetService("VirtualUser"):ClickButton1(Vector2.new())
+            game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+        end)
+    end
+})
+
+MiscBox:AddButton({
+    Text = 'Claim Code',
+    Func = function()
+        game:GetService("Players").LocalPlayer.PlayerGui.CodeGui.Frame.Buttons.Input.Text = game:GetService("Workspace").GameProperties.SecretCode.Value
+        wait(0.2)
+        firesignal(game:GetService("Players").LocalPlayer.PlayerGui.CodeGui.Frame.Buttons.Redeem.MouseButton1Down)
+    end
+})
+
+MiscBox:AddButton({
+    Text = 'Gamepass 2x Chance',
+    Func = function()
+        game:GetService("Players").LocalPlayer.UserDataHolder.DoubledChances.Value = true
+    end
+})
+
+MiscBox:AddButton({
+    Text = 'Enable Reset',
+    Func = function()
+        game:GetService("StarterGui"):SetCore("ResetButtonCallback", true)
+    end
+})
+
+MiscBox:AddButton({
+    Text = 'Fullbright',
+    Func = function()
+        if not _G.FullBrightExecuted then
+            _G.FullBrightEnabled = false
+            _G.NormalLightingSettings = {
+                Brightness = game:GetService("Lighting").Brightness,
+                ClockTime = game:GetService("Lighting").ClockTime,
+                FogEnd = game:GetService("Lighting").FogEnd,
+                GlobalShadows = game:GetService("Lighting").GlobalShadows,
+                Ambient = game:GetService("Lighting").Ambient
+            }
+            game:GetService("Lighting").Brightness = 1
+            game:GetService("Lighting").ClockTime = 12
+            game:GetService("Lighting").FogEnd = 786543
+            game:GetService("Lighting").GlobalShadows = false
+            game:GetService("Lighting").Ambient = Color3.fromRGB(178,178,178)
+            _G.FullBrightExecuted = true
+            _G.FullBrightEnabled = true
+        else
+            _G.FullBrightEnabled = not _G.FullBrightEnabled
+        end
+    end
+})
+
+MiscBox:AddToggle('AutoRemoveTrap', {
+    Text = 'Auto Remove Trap',
+    Default = false,
+    Callback = function(state)
+        getgenv().trap = state
+        spawn(function()
+            while getgenv().trap do
+                task.wait()
+                for _, v in pairs(game:GetService("Workspace").GameKeeper.Map:GetChildren()) do
+                    if v.Name == "Peels" then
+                        for _, j in pairs(v:GetChildren()) do
+                            if j:IsA("Model") then j:Destroy() end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Puzzle Automations
+local PuzzleBox = MainTab:AddLeftGroupbox('Puzzles')
+
+-- Auto Cake Puzzle
+PuzzleBox:AddToggle('AutoCake', {
+    Text = 'Auto Cake Puzzle',
+    Default = false,
+    Callback = function(state)
+        getgenv().cake = state
+        spawn(function()
+            while getgenv().cake do
+                task.wait()
+                for _, v in pairs(game:GetService("Workspace").GameKeeper.Map:GetChildren()) do
+                    if v.Name == "Items" then
+                        for _, j in pairs(v:GetChildren()) do
+                            if j.Name == "CakePlate" then
+                                for _, c in pairs(j:GetDescendants()) do
+                                    if c.ClassName == "ClickDetector" then
+                                        fireclickdetector(c)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                for _, b in pairs(game:GetService("Workspace").GameKeeper.Puzzles:GetChildren()) do
+                    if b.Name == "CakePuzzle" then
+                        for _, c in pairs(b:GetChildren()) do
+                            if c.Name == "Root" and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, c, 0)
+                                firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, c, 1)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Auto Combination Puzzle
+PuzzleBox:AddToggle('AutoCombination', {
+    Text = 'Auto Combination Puzzle',
+    Default = false,
+    Callback = function(state)
+        getgenv().combi = state
+        spawn(function()
+            while getgenv().combi do
+                task.wait()
+                for _, v in pairs(game:GetService("Workspace").GameKeeper.Puzzles:GetChildren()) do
+                    if v.Name == "CombinationPuzzle" then
+                        for _, x in pairs(v:GetChildren()) do
+                            if x.Name == "Buttons" then
+                                for _, c in pairs(x:GetChildren()) do
+                                    if c:FindFirstChild("ClickDetector") then
+                                        fireclickdetector(c.ClickDetector)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Auto Valve Puzzle
+PuzzleBox:AddToggle('AutoValve', {
+    Text = 'Auto Valve Puzzle',
+    Default = false,
+    Callback = function(state)
+        getgenv().valve = state
+        spawn(function()
+            while getgenv().valve do
+                task.wait()
+                for _, v in pairs(game:GetService("Workspace").GameKeeper.Puzzles:GetChildren()) do
+                    if v.Name == "ValvePuzzle" then
+                        for _, c in pairs(v:GetDescendants()) do
+                            if c:IsA("ClickDetector") then
+                                fireclickdetector(c)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Auto Picture Puzzle
+PuzzleBox:AddToggle('AutoPicture', {
+    Text = 'Auto Picture Puzzle',
+    Default = false,
+    Callback = function(state)
+        getgenv().picture = state
+        spawn(function()
+            while getgenv().picture do
+                task.wait(0.3)
+                for _, v in pairs(game:GetService("Workspace").GameKeeper.Puzzles:GetChildren()) do
+                    if v.Name == "PicturePuzzle" then
+                        for _, x in pairs(v:GetChildren()) do
+                            if x.Name == "Buttons" then
+                                for _, c in pairs(x:GetChildren()) do
+                                    if c.BrickColor ~= BrickColor.new("Camo") and c:FindFirstChild("ClickDetector") then
+                                        fireclickdetector(c.ClickDetector)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
     end
 })
